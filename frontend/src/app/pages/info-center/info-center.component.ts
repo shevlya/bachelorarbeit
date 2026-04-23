@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {ReactiveFormsModule, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ContactService} from '../../services/contact.service';
 import {AuthService} from '../../services/auth.service';
+import {RouterModule} from "@angular/router";
 
 const FAQ_ITEMS = [
   {
@@ -34,7 +35,7 @@ const FAQ_ITEMS = [
 @Component({
   selector: 'app-info-center',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './info-center.component.html',
   styleUrl: './info-center.component.scss'
 })
