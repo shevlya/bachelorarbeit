@@ -57,7 +57,14 @@ export class AuthService {
     return this.userSubject.getValue();
   }
 
-  register(data: { fio: string; email: string; password: string; hasDisability: boolean }): Observable<LoginResponse> {
+  register(data: {
+    fio: string;
+    email: string;
+    password: string;
+    hasDisability: boolean;
+    privacyConsent: boolean;
+    privacyConsentVersion: string;
+  }): Observable<LoginResponse> {
     const payload = {
       userStatus: 'ACTIVE',
       idRole: 3,
@@ -66,7 +73,9 @@ export class AuthService {
       email: data.email,
       password: data.password,
       birthDate: null,
-      hasDisability: data.hasDisability
+      hasDisability: data.hasDisability,
+      privacyConsent: data.privacyConsent,
+      privacyConsentVersion: data.privacyConsentVersion
     };
 
     return this.http.post<UserProfileResponse>(`${environment.authUrl}/users/register`, payload).pipe(

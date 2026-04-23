@@ -92,7 +92,9 @@ public class SecurityConfig {
                 .requestMatchers(GET, "/api/avatars/**").permitAll()
                 .requestMatchers(GET, "/api/events/**").permitAll()
                 .requestMatchers(GET, "/api/roles/**").permitAll()
-                .requestMatchers(GET, "/api/recommendations/**").permitAll();
+                .requestMatchers(GET, "/api/recommendations/**").permitAll()
+                .requestMatchers(GET, "/api/public/**").permitAll()
+                .requestMatchers(GET, "/privacy-policy").permitAll();
     }
 
     private void configureAuthenticatedEndpoints(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {

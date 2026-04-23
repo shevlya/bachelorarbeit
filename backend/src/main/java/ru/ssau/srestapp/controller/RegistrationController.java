@@ -1,5 +1,6 @@
 package ru.ssau.srestapp.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class RegistrationController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDto register(@Valid @RequestBody UserRequestDto dto) throws EntityNotFoundException {
-        return userService.create(dto);
+    public UserResponseDto register(@Valid @RequestBody UserRequestDto dto, HttpServletRequest request) throws EntityNotFoundException {
+        return userService.create(dto, request);
     }
 }

@@ -11,6 +11,7 @@ import {AdminComponent} from './pages/admin/admin.component';
 import {InfoCenterComponent} from './pages/info-center/info-center.component';
 import {authGuard} from './guards/auth.guard';
 import {roleGuard} from './guards/role.guard';
+import {PrivacyPolicyComponent} from "./pages/privacy-policy/privacy-policy.component";
 
 export const routes: Routes = [
   {
@@ -20,6 +21,10 @@ export const routes: Routes = [
   {
     path: 'info-center',
     component: InfoCenterComponent
+  },
+  {
+    path: 'privacy-policy',
+    component: PrivacyPolicyComponent
   },
   {
     path: 'events',

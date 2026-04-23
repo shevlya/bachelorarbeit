@@ -37,4 +37,10 @@ public class UserRequestDto {
     private LocalDate birthDate;
 
     private Boolean hasDisability = false;
+
+    @NotNull(message = "Необходимо согласие на обработку персональных данных")
+    private Boolean privacyConsent;
+
+    @NotBlank(message = "Версия политики обязательна")
+    private String privacyConsentVersion;
 }

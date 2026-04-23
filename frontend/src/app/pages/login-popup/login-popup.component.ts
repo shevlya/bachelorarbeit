@@ -4,11 +4,13 @@ import {ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl
 import {PopupService} from '../../services/popup.service';
 import {AuthService} from '../../services/auth.service';
 import {OrganizerRequestService} from '../../services/organizer-request.service';
+import {ConfigService} from "../../services/config.service";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-login-popup',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login-popup.component.html',
   styleUrls: ['./login-popup.component.scss']
 })
@@ -19,15 +21,20 @@ export class LoginPopupComponent implements OnInit {
   submitted = false;
   showRegisterForm = false;
   serverError: string | null = null;
+  privacyVersion: string = '';
 
   constructor(
     private fb: FormBuilder,
     private popupService: PopupService,
     private authService: AuthService,
-    private organizerRequestService: OrganizerRequestService) {
+    private organizerRequestService: OrganizerRequestService,
+    private configService: ConfigService
+  ) {
   }
 
   ngOnInit(): void {
+    this.privacyVersion = this.configService.getPrivacyVersion();
+
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
@@ -41,7 +48,10 @@ export class LoginPopupComponent implements OnInit {
       confirmPassword: ['', [Validators.required]],
       hasDisability: [false],
       wantsOrganizer: [false],
-      organizerRequestText: ['']
+      organizerRequestText: [''],
+      // ───── НОВЫЕ ПОЛЯ ─────
+      privacyConsent: [false, Validators.requiredTrue],
+      privacyConsentVersion: [this.privacyVersion]  // скрытое поле, можно не показывать
     }, {validators: this.passwordMatchValidator});
   }
 
@@ -94,7 +104,9 @@ export class LoginPopupComponent implements OnInit {
       fio: `${f.firstName} ${f.lastName}`,
       email: f.email,
       password: f.password,
-      hasDisability: f.hasDisability
+      hasDisability: f.hasDisability,
+      privacyConsent: f.privacyConsent,
+      privacyConsentVersion: this.privacyVersion   // используем актуальную версию, а не из формы
     }).subscribe({
       next: () => {
         if (f.wantsOrganizer && f.organizerRequestText) {

@@ -16,6 +16,12 @@ $purple-light: #f3f0ff;
   }
 }
 
+.form-check.is-invalid {
+  border: 1px solid #ff4757;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
 .text-purple-dark {
   color: $purple-dark;
 }

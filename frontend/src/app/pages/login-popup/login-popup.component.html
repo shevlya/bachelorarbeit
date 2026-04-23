@@ -19,6 +19,7 @@
               class="text-muted small mb-0">{{ showRegisterForm ? 'Заполните форму для регистрации' : 'Войдите в свой аккаунт' }}</p>
           </div>
 
+          <!-- Форма входа -->
           <form *ngIf="!showRegisterForm" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
             <div class="mb-3">
               <label class="form-label fw-semibold small">Email</label>
@@ -41,6 +42,7 @@
             </button>
           </form>
 
+          <!-- Форма регистрации -->
           <form *ngIf="showRegisterForm" [formGroup]="registerForm" (ngSubmit)="onRegister()">
             <div class="row g-2 mb-3">
               <div class="col-6">
@@ -99,8 +101,24 @@
                         rows="2" placeholder="Опишите ваши идеи для мероприятий..."></textarea>
             </div>
 
+            <!-- Блок чекбокса согласия с красной рамкой при ошибке -->
+            <div class="form-check mb-3" [class.is-invalid]="showRegisterFieldError('privacyConsent')">
+              <input class="form-check-input shadow-none" type="checkbox" formControlName="privacyConsent"
+                     id="privacyConsent">
+              <label class="form-check-label small" for="privacyConsent">
+                Я принимаю условия
+                <a routerLink="/privacy-policy" target="_blank" class="text-purple-dark fw-bold">Политики обработки
+                  персональных данных</a>
+                (версия {{ privacyVersion }})
+              </label>
+              <div class="invalid-feedback" *ngIf="showRegisterFieldError('privacyConsent')">
+                Необходимо согласие на обработку персональных данных
+              </div>
+            </div>
+
+            <!-- Кнопка регистрации: блокируется при загрузке ИЛИ если форма невалидна -->
             <button type="submit" class="btn btn-purple-main w-100 py-2 fw-bold rounded-3 shadow-sm mb-3"
-                    [disabled]="isLoading">
+                    [disabled]="isLoading || registerForm.invalid">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span> Зарегистрироваться
             </button>
           </form>

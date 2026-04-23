@@ -1,5 +1,6 @@
 package ru.ssau.srestapp.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,10 +10,14 @@ import ru.ssau.srestapp.entity.*;
 import ru.ssau.srestapp.exception.*;
 import ru.ssau.srestapp.repository.AvatarRepository;
 import ru.ssau.srestapp.repository.RoleRepository;
+import ru.ssau.srestapp.repository.UserConsentRepository;
 import ru.ssau.srestapp.repository.UserRepository;
 import ru.ssau.srestapp.util.SecurityUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import static java.lang.Boolean.TRUE;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final AvatarRepository avatarRepository;
+    private final UserConsentRepository userConsentRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -35,7 +41,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDto create(UserRequestDto dto) throws EmailAlreadyExistsException, EntityNotFoundException {
+    public UserResponseDto create(UserRequestDto dto, HttpServletRequest request) throws EmailAlreadyExistsException, EntityNotFoundException {
         checkUniqueEmail(dto.getEmail());
         User entity = new User();
         entity.setUserStatus(dto.getUserStatus());
@@ -46,6 +52,18 @@ public class UserService {
         entity.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         entity.setBirthDate(dto.getBirthDate());
         entity.setHasDisability(dto.getHasDisability());
+        User savedUser = userRepository.save(entity);
+        if (TRUE.equals(dto.getPrivacyConsent())) {
+            UserConsent consent = new UserConsent();
+            consent.setUser(savedUser);
+            consent.setVersion(dto.getPrivacyConsentVersion());
+            consent.setConsentDate(LocalDateTime.now());
+            consent.setIpAddress(request.getRemoteAddr());
+            consent.setUserAgent(request.getHeader("User-Agent"));
+            userConsentRepository.save(consent);
+        } else {
+            throw new IllegalArgumentException("Согласие на обработку персональных данных не получено");
+        }
         emailService.sendWelcome(entity.getEmail(), entity.getFio());
         return toDto(userRepository.save(entity));
     }
