@@ -1,0 +1,133 @@
+.manage-routes {
+  min-height: 70vh;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.status-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.btn-create {
+  background: var(--pastel-purple-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--pastel-purple-dark);
+    color: white;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.routes-table-wrapper {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-small);
+  overflow: hidden;
+}
+
+.routes-table {
+  margin: 0;
+
+  th {
+    background: var(--pastel-purple-lighter);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-light);
+    border: none;
+    padding: 0.85rem 1rem;
+  }
+
+  td {
+    vertical-align: middle;
+    padding: 0.85rem 1rem;
+    border-color: var(--pastel-purple-lighter);
+  }
+}
+
+.route-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.route-desc-short {
+  font-size: 0.8rem;
+  color: var(--text-lighter);
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-points {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+.btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+
+  &.btn-edit {
+    color: var(--pastel-purple-dark);
+
+    &:hover {
+      background: var(--pastel-purple-lighter);
+    }
+  }
+
+  &.btn-delete {
+    color: #dc3545;
+
+    &:hover {
+      background: #fff5f5;
+    }
+  }
+}

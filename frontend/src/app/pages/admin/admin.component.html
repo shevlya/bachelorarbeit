@@ -67,6 +67,15 @@
         <i class="bi bi-journal"></i>
         <span *ngIf="!sidebarCollapsed">Справочники</span>
       </button>
+      <button class="nav-item d-flex align-items-center gap-2 border-0 rounded-3 px-2 py-2 text-nowrap w-100"
+              [class.active]="activeTab === 'routes'" (click)="setTab('routes')">
+        <i class="bi bi-map"></i>
+        <span *ngIf="!sidebarCollapsed">{{ 'NAV.ROUTES' | t }}
+          @if (pendingRoutes.length > 0) {
+            <span class="badge bg-warning text-dark ms-1">{{ pendingRoutes.length }}</span>
+          }
+        </span>
+      </button>
     </nav>
   </aside>
 
@@ -646,7 +655,85 @@
         </div>
       </div>
 
+      <div *ngIf="activeTab === 'routes'" class="tab-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="fs-5 fw-semibold m-0">{{ 'ADMIN.PENDING_ROUTES' | t }}</h2>
+          <button class="btn btn-sm btn-outline-secondary" (click)="loadPendingRoutes()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Обновить
+          </button>
+        </div>
+
+        @if (routesLoading) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+          </div>
+        } @else if (pendingRoutes.length === 0) {
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-check-circle fs-2 d-block mb-2"></i>
+            Нет маршрутов на проверке
+          </div>
+        } @else {
+          <div class="d-flex flex-column gap-3">
+            @for (route of pendingRoutes; track route.idRoute) {
+              <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+
+                    <div>
+                      <h3 class="fs-6 fw-semibold mb-1">{{ route.routeName }}</h3>
+                      <p class="text-muted small mb-1">{{ route.routeDescription }}</p>
+                      <div class="d-flex gap-3 small text-muted">
+                        <span><i class="bi bi-clock me-1"></i>{{ formatRouteDuration(route.estimatedDurationMinutes) }}</span>
+                        <span><i class="bi bi-geo-alt me-1"></i>{{ route.pointCount }} точек</span>
+                        <span><i class="bi bi-person me-1"></i>{{ route.organizerFio }}</span>
+                      </div>
+                    </div>
+
+                    <div class="d-flex gap-1 align-items-center">
+                      @if (routeRejectId === route.idRoute) {
+                        <div class="d-flex gap-2 align-items-center">
+                          <input type="text" class="form-control form-control-sm"
+                                 [(ngModel)]="routeRejectComment"
+                                 placeholder="{{ 'ADMIN.COMMENT_PLACEHOLDER' | t }}"
+                                 style="width:220px">
+
+                          <button class="action-btn action-btn--reject"
+                                  (click)="confirmRouteReject()"
+                                  title="Подтвердить отклонение">
+                            <ng-container *ngTemplateOutlet="iconReject"></ng-container>
+                          </button>
+
+                          <button class="action-btn action-btn--view"
+                                  (click)="cancelRouteReject()"
+                                  title="Отмена">
+                            <ng-container *ngTemplateOutlet="iconView"></ng-container>
+                          </button>
+                        </div>
+                      } @else {
+                        <button class="action-btn action-btn--approve"
+                                (click)="approveRoute(route.idRoute)"
+                                title="Одобрить">
+                          <ng-container *ngTemplateOutlet="iconApprove"></ng-container>
+                        </button>
+
+                        <button class="action-btn action-btn--reject"
+                                (click)="openRouteRejectDialog(route.idRoute)"
+                                title="Отклонить">
+                          <ng-container *ngTemplateOutlet="iconReject"></ng-container>
+                        </button>
+                      }
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </div>
+
+
   </main>
 
   <ng-template #loadingTpl>

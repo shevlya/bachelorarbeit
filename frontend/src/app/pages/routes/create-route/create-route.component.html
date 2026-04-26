@@ -1,0 +1,105 @@
+<div class="form-page">
+  <div class="container py-4">
+    <div class="form-card">
+      <h1 class="form-title">{{ 'ROUTES.CREATE_TITLE' | t }}</h1>
+
+      @if (error) {
+        <div class="alert alert-danger">{{ error }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+
+        <!-- Basic info -->
+        <div class="form-section">
+          <div class="mb-3">
+            <label class="form-label required">{{ 'ROUTES.ROUTE_NAME' | t }}</label>
+            <input type="text" class="form-control" formControlName="routeName"
+                   [class.is-invalid]="form.get('routeName')?.invalid && form.get('routeName')?.touched">
+            @if (form.get('routeName')?.invalid && form.get('routeName')?.touched) {
+              <div class="invalid-feedback">Required</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">{{ 'ROUTES.ROUTE_DESCRIPTION' | t }}</label>
+            <textarea class="form-control" formControlName="routeDescription" rows="3"></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">{{ 'ROUTES.ESTIMATED_DURATION' | t }}</label>
+              <input type="number" class="form-control" formControlName="estimatedDurationMinutes" min="1">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">{{ 'ROUTES.IMAGE_URL' | t }}</label>
+              <input type="text" class="form-control" formControlName="imageUrl">
+            </div>
+          </div>
+        </div>
+
+        <!-- Points -->
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">{{ 'ROUTES.POINTS' | t }}</h2>
+            <button type="button" class="btn-add-point" (click)="addPoint()">
+              <i class="bi bi-plus-lg me-1"></i>{{ 'ROUTES.ADD_POINT' | t }}
+            </button>
+          </div>
+
+          <div formArrayName="points">
+            @for (point of points.controls; track point; let i = $index) {
+              <div class="point-form" [formGroupName]="i">
+                <div class="point-form__header">
+                  <span class="point-number">{{ i + 1 }}</span>
+                  <button type="button" class="btn-remove-point"
+                          (click)="removePoint(i)"
+                          [disabled]="points.length === 1">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+
+                <div class="row g-2">
+                  <div class="col-md-6">
+                    <label class="form-label required">{{ 'ROUTES.POINT_NAME' | t }}</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="pointName"
+                           [class.is-invalid]="point.get('pointName')?.invalid && point.get('pointName')?.touched">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">{{ 'ROUTES.POINT_DESCRIPTION' | t }}</label>
+                    <input type="text" class="form-control form-control-sm" formControlName="pointDescription">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label required">{{ 'ROUTES.LATITUDE' | t }}</label>
+                    <input type="number" step="0.0001" class="form-control form-control-sm"
+                           formControlName="latitude"
+                           [class.is-invalid]="point.get('latitude')?.invalid && point.get('latitude')?.touched">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label required">{{ 'ROUTES.LONGITUDE' | t }}</label>
+                    <input type="number" step="0.0001" class="form-control form-control-sm"
+                           formControlName="longitude"
+                           [class.is-invalid]="point.get('longitude')?.invalid && point.get('longitude')?.touched">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="cancel()">
+            {{ 'ROUTES.CANCEL' | t }}
+          </button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            {{ 'ROUTES.SAVE' | t }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

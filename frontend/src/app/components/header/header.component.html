@@ -9,15 +9,16 @@
       <button class="mobile-menu-btn"
               [class.active]="isMobileMenuOpen"
               (click)="toggleMobileMenu()"
-              aria-label="Меню">
+              aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
 
       <nav class="main-nav" [class.active]="isMobileMenuOpen">
-        <button class="close-menu-btn" (click)="closeMobileMenu()" aria-label="Закрыть">×</button>
+        <button class="close-menu-btn" (click)="closeMobileMenu()" aria-label="Close">×</button>
         <ul class="m-0 p-0 d-flex align-items-center">
-          <li><a routerLink="/info-center" (click)="closeMobileMenu()">Справочный уголок</a></li>
-          <li><a routerLink="/events" (click)="closeMobileMenu()">Мероприятия</a></li>
+          <li><a routerLink="/info-center" (click)="closeMobileMenu()">{{ 'NAV.INFO_CENTER' | t }}</a></li>
+          <li><a routerLink="/events" (click)="closeMobileMenu()">{{ 'NAV.EVENTS' | t }}</a></li>
+          <li><a routerLink="/routes" (click)="closeMobileMenu()">{{ 'NAV.ROUTES' | t }}</a></li>
         </ul>
       </nav>
 
@@ -26,22 +27,38 @@
       }
 
       <div class="header-actions">
+
+        <!-- Language switcher -->
+        <div class="lang-switcher">
+          <button
+            class="lang-btn"
+            [class.active]="currentLang === 'ru'"
+            (click)="switchLang('ru')">RU
+          </button>
+          <span class="lang-sep">|</span>
+          <button
+            class="lang-btn"
+            [class.active]="currentLang === 'en'"
+            (click)="switchLang('en')">EN
+          </button>
+        </div>
+
         @if (!isLoggedIn) {
           <button class="btn-pastel auth-btn" (click)="openLogin()">
             <i class="bi bi-person"></i>
-            Войти
+            {{ 'AUTH.LOGIN' | t }}
           </button>
         } @else {
           <div class="user-profile" (click)="toggleProfileMenu()">
             <div class="user-avatar">
-              <img [src]="userAvatar" (error)="userAvatar = defaultAvatar" alt="Аватар">
+              <img [src]="userAvatar" (error)="userAvatar = defaultAvatar" alt="Avatar">
             </div>
             <span class="user-name">{{ userName }}</span>
 
             @if (isProfileMenuOpen) {
               <div class="profile-menu">
-                <button class="profile-menu-item" (click)="openProfile()">Мой профиль</button>
-                <button class="profile-menu-item" (click)="openMyEvents()">Мои мероприятия</button>
+                <button class="profile-menu-item" (click)="openProfile()">{{ 'AUTH.MY_PROFILE' | t }}</button>
+                <button class="profile-menu-item" (click)="openMyEvents()">{{ 'AUTH.MY_EVENTS' | t }}</button>
 
                 @if (isOrganizer || isAdmin) {
                   <ng-container *ngTemplateOutlet="organizerButtons"></ng-container>
@@ -51,12 +68,13 @@
                   <div class="profile-menu-divider"></div>
                   <button class="profile-menu-item profile-menu-item--admin" (click)="openAdminPanel()">
                     <i class="bi bi-card-list"></i>
-                    Панель администратора
+                    {{ 'AUTH.ADMIN_PANEL' | t }}
                   </button>
                 }
 
                 <div class="profile-menu-divider"></div>
-                <button class="profile-menu-item profile-menu-item--logout" (click)="logout()">Выйти</button>
+                <button class="profile-menu-item profile-menu-item--logout" (click)="logout()">{{ 'AUTH.LOGOUT' | t }}
+                </button>
               </div>
             }
           </div>
@@ -70,10 +88,19 @@
   <div class="profile-menu-divider"></div>
   <button class="profile-menu-item profile-menu-item--organizer" (click)="openCreateEvent()">
     <i class="bi bi-plus-lg"></i>
-    Создать мероприятие
+    {{ 'AUTH.CREATE_EVENT' | t }}
   </button>
   <button class="profile-menu-item profile-menu-item--organizer" (click)="openManageEvents()">
     <i class="bi bi-calendar-check"></i>
-    Управление мероприятиями
+    {{ 'AUTH.MANAGE_EVENTS' | t }}
+  </button>
+  <div class="profile-menu-divider"></div>
+  <button class="profile-menu-item profile-menu-item--organizer" (click)="openCreateRoute()">
+    <i class="bi bi-plus-lg"></i>
+    {{ 'AUTH.CREATE_ROUTE' | t }}
+  </button>
+  <button class="profile-menu-item profile-menu-item--organizer" (click)="openManageRoutes()">
+    <i class="bi bi-map"></i>
+    {{ 'AUTH.MANAGE_ROUTES' | t }}
   </button>
 </ng-template>

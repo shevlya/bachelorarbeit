@@ -1,0 +1,82 @@
+<div class="route-detail-page">
+  <div class="container py-4">
+
+    <button class="btn-back mb-3" (click)="goBack()">
+      <i class="bi bi-arrow-left me-2"></i>{{ 'COMMON.BACK' | t }}
+    </button>
+
+    @if (isLoading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary"></div>
+      </div>
+    } @else if (error) {
+      <div class="alert alert-danger">{{ error }}</div>
+    } @else if (route) {
+
+      <!-- HEADER -->
+      <div class="route-header">
+        @if (route.imageUrl) {
+          <div class="route-cover">
+            <img [src]="route.imageUrl" [alt]="route.routeName">
+          </div>
+        }
+
+        <div class="route-info">
+          <h1 class="route-title">{{ route.routeName }}</h1>
+
+          <div class="route-meta">
+            <span><i class="bi bi-clock me-1"></i>{{ formatDuration(route.estimatedDurationMinutes) }}</span>
+            <span><i class="bi bi-geo-alt me-1"></i>{{ route.points.length }} {{ 'ROUTES.POINTS' | t }}</span>
+            <span><i class="bi bi-person me-1"></i>{{ route.organizerFio }}</span>
+          </div>
+
+          @if (route.routeDescription) {
+            <p class="route-description">{{ route.routeDescription }}</p>
+          }
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="route-layout mt-4">
+
+        <!-- MAP -->
+        <div class="map-wrapper">
+          <h2 class="section-title">{{ 'ROUTES.MAP' | t }}</h2>
+          <div class="map-container" #mapContainer></div>
+        </div>
+
+        <!-- POINTS LIST -->
+        <div class="points-wrapper">
+          <h2 class="section-title">
+            <i class="bi bi-geo-alt-fill me-2"></i>{{ 'ROUTES.POINTS' | t }}
+          </h2>
+
+          <div class="points-list">
+            @for (point of route.points; track point.idRoutePoint; let i = $index) {
+              <div class="point-item" (click)="togglePoint(i)">
+                <div class="point-number">{{ i + 1 }}</div>
+
+                <div class="point-content">
+                  <h3 class="point-name">{{ point.pointName }}</h3>
+
+                  @if (activePointIndex === i) {
+
+                    @if (point.pointDescription) {
+                      <p class="point-desc">{{ point.pointDescription }}</p>
+                    }
+                  }
+
+                  <span class="point-coords">
+                    {{ point.latitude | number:'1.4-4' }},
+                    {{ point.longitude | number:'1.4-4' }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+</div>

@@ -9,13 +9,16 @@ import {environment} from '../../environment';
 import {
   AdminEvent, AdminStatistics, CatalogItem, ConfirmConfig, DraftField,
   OrganizerRequestShort, ROLE_LABELS, USER_STATUS_LABELS, USER_STATUSES, UserResponse
-} from "../../models/admin.models";
-import {AuthService} from "../../services/auth.service";
+} from '../../models/admin.models';
+import {AuthService} from '../../services/auth.service';
+import {RouteService} from '../../services/route.service';
+import {RouteCard} from '../../models/route.models';
+import {TranslatePipe} from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })
@@ -57,6 +60,13 @@ export class AdminComponent implements OnInit {
 
   activeTab = 'dashboard';
   sidebarCollapsed = false;
+
+  // Routes moderation
+  pendingRoutes: RouteCard[] = [];
+  routeRejectComment = '';
+  routeRejectId: number | null = null;
+  routesLoading = false;
+
   loading = false;
   stats: AdminStatistics | null = null;
   roleLabels = ROLE_LABELS;
@@ -109,7 +119,8 @@ export class AdminComponent implements OnInit {
     private http: HttpClient,
     private router: Router,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private routeService: RouteService
   ) {
     this.catalogForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2)]],
@@ -130,7 +141,6 @@ export class AdminComponent implements OnInit {
         this.currentUserId = Number(user.userId);
         resolve();
       } else {
-        // Если пользователь ещё не загружен — ждём из стрима
         this.authService.user$.pipe(take(1)).subscribe({
           next: u => {
             this.currentUserId = u ? Number(u.userId) : null;
@@ -165,6 +175,7 @@ export class AdminComponent implements OnInit {
     this.loadRequests();
     this.loadUsers();
     this.loadCatalog();
+    this.loadPendingRoutes();
   }
 
   setTab(tab: string) {
@@ -299,7 +310,7 @@ export class AdminComponent implements OnInit {
       for (const [key, newValue] of Object.entries(draft)) {
         const meta = fieldMap[key];
         if (meta) {
-          let displayNew = newValue;
+          let displayNew: any = newValue;
           if (key === 'eventCategoryId') displayNew = newCategoryName;
           if (key === 'placeId') displayNew = newPlaceInfo;
           fields.push({key, currentValue: meta.current, newValue: displayNew, label: meta.label, selected: true});
@@ -398,7 +409,9 @@ export class AdminComponent implements OnInit {
 
   filterUsers() {
     const q = this.userSearchQuery.toLowerCase();
-    this.filteredUsers = q ? this.allUsers.filter(u => u.fio.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) : [...this.allUsers];
+    this.filteredUsers = q
+      ? this.allUsers.filter(u => u.fio.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+      : [...this.allUsers];
   }
 
   private readonly catalogEndpoints: Record<string, string> = {
@@ -460,7 +473,6 @@ export class AdminComponent implements OnInit {
     }
     const {name, description, colorCode} = this.catalogForm.value;
     if (!name?.trim()) return;
-
     const bodyBuilders: Record<string, (n: string, d: string, c?: string) => any> = {
       categories: (n, d, c) => ({eventCategoryName: n, eventCategoryDescription: d, colorCode: c}),
       roles: (n, d) => ({roleName: n, roleDescription: d})
@@ -468,7 +480,6 @@ export class AdminComponent implements OnInit {
     const endpoint = this.catalogEndpoints[this.activeCatalogTab];
     const buildBody = bodyBuilders[this.activeCatalogTab];
     if (!endpoint || !buildBody) return;
-
     const body = buildBody(name.trim(), description?.trim() ?? '', colorCode);
     const request$ = this.editingItem
       ? this.http.put(`${this.BASE}${endpoint}/${this.editingItem.id}`, body, {headers: this.headers})
@@ -494,11 +505,11 @@ export class AdminComponent implements OnInit {
           },
           error: (err: HttpErrorResponse) => {
             this.confirmModal.visible = false;
-            let errorMessage = 'Не удалось удалить запись';
-            if (err.status === 403) errorMessage = 'Доступ запрещён: требуется роль Администратора';
-            else if (err.status === 409) errorMessage = 'Невозможно удалить: запись используется';
-            else if (err.error?.message) errorMessage = err.error.message;
-            alert(errorMessage);
+            let msg = 'Не удалось удалить запись';
+            if (err.status === 403) msg = 'Доступ запрещён: требуется роль Администратора';
+            else if (err.status === 409) msg = 'Невозможно удалить: запись используется';
+            else if (err.error?.message) msg = err.error.message;
+            alert(msg);
           }
         });
       }
@@ -507,13 +518,8 @@ export class AdminComponent implements OnInit {
 
   private openConfirm(config: Partial<ConfirmConfig> & { onConfirm: () => void }) {
     this.confirmModal = {
-      visible: true,
-      title: '',
-      message: '',
-      confirmLabel: 'Подтвердить',
-      type: 'approve',
-      showComment: false,
-      comment: '', ...config
+      visible: true, title: '', message: '', confirmLabel: 'Подтвердить',
+      type: 'approve', showComment: false, comment: '', ...config
     };
   }
 
@@ -535,10 +541,7 @@ export class AdminComponent implements OnInit {
       return;
     }
     this.http.patch(`${this.BASE}${this.API.USERS}/${userId}/status`, {userStatus: newStatus}, {headers: this.headers})
-      .subscribe({
-        next: () => this.loadUsers(),
-        error: err => alert('Ошибка обновления статуса: ' + (err.error?.message || err.message))
-      });
+      .subscribe({next: () => this.loadUsers(), error: err => alert('Ошибка: ' + (err.error?.message || err.message))});
   }
 
   updateUserRole(userId: number, roleId: number) {
@@ -547,20 +550,15 @@ export class AdminComponent implements OnInit {
       return;
     }
     this.http.patch(`${this.BASE}${this.API.USERS}/${userId}/role`, {roleId}, {headers: this.headers})
-      .subscribe({
-        next: () => this.loadUsers(),
-        error: err => alert('Ошибка обновления роли: ' + (err.error?.message || err.message))
-      });
+      .subscribe({next: () => this.loadUsers(), error: err => alert('Ошибка: ' + (err.error?.message || err.message))});
   }
 
   openRoleSelect(userId: number) {
-    if (this.currentUserId === userId) return;
-    this.activeRoleSelectUserId = userId;
+    if (this.currentUserId !== userId) this.activeRoleSelectUserId = userId;
   }
 
   openStatusSelect(userId: number) {
-    if (this.currentUserId === userId) return;
-    this.activeStatusSelectUserId = userId;
+    if (this.currentUserId !== userId) this.activeStatusSelectUserId = userId;
   }
 
   closeRoleSelect() {
@@ -572,8 +570,7 @@ export class AdminComponent implements OnInit {
   }
 
   onRoleChange(userId: number, roleName: string) {
-    const roleId = this.getRoleIdByName(roleName);
-    this.updateUserRole(userId, roleId);
+    this.updateUserRole(userId, this.getRoleIdByName(roleName));
     this.closeRoleSelect();
   }
 
@@ -593,5 +590,59 @@ export class AdminComponent implements OnInit {
 
   getEventFormatLabel(format: string): string {
     return this.EVENT_FORMAT_LABELS[format] || format;
+  }
+
+  // ── Routes moderation ──────────────────────────────────────────────────────
+
+  loadPendingRoutes() {
+    this.routesLoading = true;
+    this.routeService.getPendingRoutes().subscribe({
+      next: (routes: RouteCard[]) => {
+        this.pendingRoutes = routes;
+        this.routesLoading = false;
+      },
+      error: () => {
+        this.routesLoading = false;
+      }
+    });
+  }
+
+  approveRoute(routeId: number) {
+    const admin = this.authService.getCurrentUser();
+    if (!admin) return;
+    this.routeService.approveRoute(routeId, admin.userId).subscribe({
+      next: () => {
+        this.pendingRoutes = this.pendingRoutes.filter(r => r.idRoute !== routeId);
+      }
+    });
+  }
+
+  openRouteRejectDialog(routeId: number) {
+    this.routeRejectId = routeId;
+    this.routeRejectComment = '';
+  }
+
+  confirmRouteReject() {
+    if (this.routeRejectId === null) return;
+    const id = this.routeRejectId;
+    this.routeService.rejectRoute(id, this.routeRejectComment || undefined).subscribe({
+      next: () => {
+        this.pendingRoutes = this.pendingRoutes.filter(r => r.idRoute !== id);
+        this.routeRejectId = null;
+        this.routeRejectComment = '';
+      }
+    });
+  }
+
+  cancelRouteReject() {
+    this.routeRejectId = null;
+    this.routeRejectComment = '';
+  }
+
+  formatRouteDuration(minutes: number): string {
+    if (minutes < 60) return minutes + ' min';
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}min` : `${h}h`;
   }
 }

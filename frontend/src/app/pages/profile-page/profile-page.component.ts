@@ -27,8 +27,8 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
 
   currentUser: User | null = null;
   userBirthDate: string | null = null;
-  hasDisability = false;
-  disabilityUpdating = false;
+  //hasDisability = false;
+  //disabilityUpdating = false;
 
   favoriteCategories: { id: number; name: string; color: string }[] = [];
   allCategories: CategoryDto[] = [];
@@ -77,7 +77,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     this.userSub = this.authService.user$.subscribe(user => {
       this.currentUser = user;
       if (user) {
-        this.hasDisability = user.hasDisability ?? false;
+        //this.hasDisability = user.hasDisability ?? false;
         this.userBirthDate = user.birthDate ? EventUtils.formatDate(user.birthDate) : null;
 
         if (this.authService.getToken()) {
@@ -163,6 +163,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
   get hasMoreCategories() { return this.favoriteCategories.length > this.maxVisibleCategories; }
   get hiddenCategoriesCount() { return this.favoriteCategories.length - this.maxVisibleCategories; }
 
+  /*
   toggleDisability(): void {
     this.disabilityUpdating = true;
     this.authService.updateDisability(!this.hasDisability).subscribe({
@@ -172,7 +173,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
       },
       error: () => this.disabilityUpdating = false
     });
-  }
+  }*/
 
   openAvatarPicker(): void {
     this.avatarSaveError = false;

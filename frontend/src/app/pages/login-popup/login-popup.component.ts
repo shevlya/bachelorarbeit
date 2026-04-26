@@ -104,7 +104,7 @@ export class LoginPopupComponent implements OnInit {
       fio: `${f.firstName} ${f.lastName}`,
       email: f.email,
       password: f.password,
-      hasDisability: f.hasDisability,
+      //hasDisability: f.hasDisability,
       privacyConsent: f.privacyConsent,
       privacyConsentVersion: this.privacyVersion   // используем актуальную версию, а не из формы
     }).subscribe({

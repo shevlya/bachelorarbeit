@@ -5,7 +5,7 @@ export interface User {
   roleName: string;
   avatarUrl?: string | null;
   avatarId?: number | null;
-  hasDisability?: boolean;
+  //hasDisability?: boolean;
   birthDate?: string | null;
 }
 

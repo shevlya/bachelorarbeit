@@ -42,6 +42,6 @@ public class User {
 
     private LocalDate birthDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Boolean hasDisability = false;
 }

@@ -1,0 +1,88 @@
+<div class="manage-routes container py-4">
+
+  <div class="page-header mb-4">
+    <h1 class="page-title">{{ 'ROUTES.MANAGE_TITLE' | t }}</h1>
+    <a routerLink="/routes/create" class="btn-create">
+      <i class="bi bi-plus-lg me-2"></i>{{ 'AUTH.CREATE_ROUTE' | t }}
+    </a>
+  </div>
+
+  @if (isLoading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  } @else if (error) {
+    <div class="alert alert-danger">{{ error }}</div>
+  } @else if (routes.length === 0) {
+    <div class="empty-state">
+      <i class="bi bi-map fs-1 text-muted"></i>
+      <p class="mt-2 text-muted">{{ 'ROUTES.NO_ROUTES' | t }}</p>
+    </div>
+  } @else {
+    <div class="routes-table-wrapper">
+      <table class="table routes-table">
+        <thead>
+        <tr>
+          <th>{{ 'ROUTES.ROUTE_NAME' | t }}</th>
+          <th>{{ 'ROUTES.POINTS' | t }}</th>
+          <th>{{ 'ROUTES.DURATION' | t }}</th>
+          <th>{{ 'ROUTES.STATUS' | t }}</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (route of routes; track route.idRoute) {
+            <tr>
+              <td>
+                <div class="route-name">{{ route.routeName }}</div>
+                @if (route.routeDescription) {
+                  <div class="route-desc-short">{{ route.routeDescription }}</div>
+                }
+              </td>
+
+              <td>
+                <span class="badge-points">
+                  <i class="bi bi-geo-alt me-1"></i>{{ route.pointCount }}
+                </span>
+              </td>
+
+              <td>{{ formatDuration(route.estimatedDurationMinutes) }}</td>
+
+              <!-- 🔥 ОБЪЕДИНЕННЫЙ СТОЛБЕЦ -->
+              <td>
+                <div class="status-actions">
+                  <span class="badge rounded-pill"
+                        [class]="getModerationClass(route.moderationStatus)">
+                    {{ getModerationText(route.moderationStatus) }}
+                  </span>
+
+                  <div class="actions">
+                    <button class="btn-action btn-edit"
+                            (click)="editRoute(route.idRoute)"
+                            title="{{ 'ROUTES.EDIT' | t }}">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <button class="btn-action btn-delete"
+                            (click)="openDeleteDialog(route.idRoute)"
+                            title="{{ 'ROUTES.DELETE' | t }}">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (showDeleteDialog) {
+    <app-confirmation-dialog
+      message="{{ 'COMMON.CONFIRM_DELETE' | t }}"
+      (confirm)="confirmDelete()"
+      (cancel)="closeDeleteDialog()">
+    </app-confirmation-dialog>
+  }
+
+</div>

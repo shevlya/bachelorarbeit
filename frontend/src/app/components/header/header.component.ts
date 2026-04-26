@@ -4,11 +4,13 @@ import {NgTemplateOutlet} from '@angular/common';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {PopupService} from '../../services/popup.service';
 import {AuthService} from '../../services/auth.service';
+import {TranslateService, SupportedLang} from '../../services/translate.service';
+import {TranslatePipe} from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, NgTemplateOutlet],
+  imports: [RouterLink, NgTemplateOutlet, TranslatePipe],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
@@ -17,6 +19,7 @@ export class HeaderComponent implements OnInit {
   private popupService = inject(PopupService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  public translate = inject(TranslateService);
 
   isLoggedIn = false;
   userName = '';
@@ -26,6 +29,10 @@ export class HeaderComponent implements OnInit {
   isMobileMenuOpen = false;
 
   readonly defaultAvatar = 'assets/avatars/avatar0.jpg';
+
+  get currentLang(): SupportedLang {
+    return this.translate.currentLang;
+  }
 
   ngOnInit() {
     this.authService.isLoggedIn$
@@ -52,11 +59,9 @@ export class HeaderComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-
     if (!target.closest('.user-profile') && this.isProfileMenuOpen) {
       this.isProfileMenuOpen = false;
     }
-
     if (!target.closest('.mobile-menu-btn') &&
       !target.closest('.main-nav') &&
       this.isMobileMenuOpen) {
@@ -91,6 +96,10 @@ export class HeaderComponent implements OnInit {
     this.router.navigate([path]);
   }
 
+  switchLang(lang: SupportedLang) {
+    this.translate.switchLang(lang);
+  }
+
   openLogin() {
     this.popupService.openLoginPopup();
     this.closeMobileMenu();
@@ -116,6 +125,14 @@ export class HeaderComponent implements OnInit {
 
   openManageEvents() {
     this.navigateWithMenuClose('/events/manage');
+  }
+
+  openCreateRoute() {
+    this.navigateWithMenuClose('/routes/create');
+  }
+
+  openManageRoutes() {
+    this.navigateWithMenuClose('/routes/manage');
   }
 
   openAdminPanel() {

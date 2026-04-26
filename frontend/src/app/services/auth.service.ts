@@ -23,7 +23,7 @@ interface UserProfileResponse {
   fio: string;
   email: string;
   birthDate: string | null;
-  hasDisability: boolean;
+  //hasDisability: boolean;
 }
 
 @Injectable({providedIn: 'root'})
@@ -61,7 +61,7 @@ export class AuthService {
     fio: string;
     email: string;
     password: string;
-    hasDisability: boolean;
+    //hasDisability: boolean;
     privacyConsent: boolean;
     privacyConsentVersion: string;
   }): Observable<LoginResponse> {
@@ -73,7 +73,6 @@ export class AuthService {
       email: data.email,
       password: data.password,
       birthDate: null,
-      hasDisability: data.hasDisability,
       privacyConsent: data.privacyConsent,
       privacyConsentVersion: data.privacyConsentVersion
     };
@@ -131,7 +130,7 @@ export class AuthService {
     fio: string;
     email: string;
     idAvatar: number | null;
-    hasDisability: boolean;
+    //hasDisability: boolean;
     birthDate: string | null
   }>): Observable<User> {
     const current = this.getCurrentUser();
@@ -139,7 +138,7 @@ export class AuthService {
     const payload = {
       fio: current?.fio ?? '',
       email: current?.email ?? '',
-      hasDisability: current?.hasDisability ?? false,
+      //hasDisability: current?.hasDisability ?? false,
       birthDate: current?.birthDate ?? null,
       idAvatar: current?.avatarId ?? null,
       ...updateData
@@ -151,12 +150,13 @@ export class AuthService {
     );
   }
 
+  /*
   updateDisability(hasDisability: boolean): Observable<User> {
     return this.http.patch<UserProfileResponse>(`${environment.apiUrl}/users/me/disability`, {hasDisability}).pipe(
       tap(profile => this.applyServerProfile(profile)),
       map(profile => this.mapToUser(profile))
     );
-  }
+  }*/
 
   changePassword(currentPassword: string, newPassword: string): Observable<void> {
     const payload = {currentPassword, newPassword};
@@ -178,7 +178,7 @@ export class AuthService {
       roleName: '',
       avatarUrl: null,
       avatarId: null,
-      hasDisability: false,
+      //hasDisability: false,
       birthDate: null
     };
 
@@ -201,7 +201,6 @@ export class AuthService {
       roleName: profile.roleName,
       avatarUrl: profile.avatarUrl,
       avatarId: profile.idAvatar,
-      hasDisability: profile.hasDisability,
       birthDate: profile.birthDate
     };
   }

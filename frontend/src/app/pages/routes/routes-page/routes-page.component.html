@@ -1,0 +1,68 @@
+<div class="routes-page">
+  <div class="container py-4">
+    <div class="page-header mb-4">
+      <h1 class="page-title">{{ 'ROUTES.TITLE' | t }}</h1>
+      <div class="search-bar">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearch()"
+            [placeholder]="'ROUTES.SEARCH_PLACEHOLDER' | t">
+        </div>
+      </div>
+    </div>
+
+    @if (isLoading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">{{ 'ROUTES.LOADING' | t }}</p>
+      </div>
+    } @else if (error) {
+      <div class="alert alert-danger">{{ error }}</div>
+    } @else if (filteredRoutes.length === 0) {
+      <div class="empty-state">
+        <i class="bi bi-map fs-1 text-muted"></i>
+        <p class="mt-2 text-muted">{{ 'ROUTES.NO_ROUTES' | t }}</p>
+      </div>
+    } @else {
+      <div class="routes-grid">
+        @for (route of filteredRoutes; track route.idRoute) {
+          <div class="route-card" [routerLink]="['/routes', route.idRoute]">
+            <div class="route-card__image">
+              @if (route.imageUrl) {
+                <img [src]="route.imageUrl" [alt]="route.routeName" loading="lazy">
+              } @else {
+                <div class="route-card__image-placeholder">
+                  <i class="bi bi-map"></i>
+                </div>
+              }
+              <div class="route-card__badge">
+                <i class="bi bi-geo-alt-fill me-1"></i>
+                {{ route.pointCount }} {{ 'ROUTES.POINTS' | t }}
+              </div>
+            </div>
+            <div class="route-card__body">
+              <h3 class="route-card__title">{{ route.routeName }}</h3>
+              @if (route.routeDescription) {
+                <p class="route-card__desc">{{ route.routeDescription }}</p>
+              }
+              <div class="route-card__meta">
+                <span class="meta-item">
+                  <i class="bi bi-clock me-1"></i>
+                  {{ formatDuration(route.estimatedDurationMinutes) }}
+                </span>
+                <span class="meta-item">
+                  <i class="bi bi-person me-1"></i>
+                  {{ route.organizerFio }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

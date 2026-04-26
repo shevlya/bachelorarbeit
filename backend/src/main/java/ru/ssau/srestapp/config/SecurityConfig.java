@@ -94,7 +94,9 @@ public class SecurityConfig {
                 .requestMatchers(GET, "/api/roles/**").permitAll()
                 .requestMatchers(GET, "/api/recommendations/**").permitAll()
                 .requestMatchers(GET, "/api/public/**").permitAll()
-                .requestMatchers(GET, "/privacy-policy").permitAll();
+                .requestMatchers(GET, "/privacy-policy").permitAll()
+                .requestMatchers("/routes/**").permitAll()
+                .requestMatchers(GET, "/api/routes/**").permitAll();
     }
 
     private void configureAuthenticatedEndpoints(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
